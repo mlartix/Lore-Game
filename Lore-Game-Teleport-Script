@@ -1,0 +1,61 @@
+local Lighting = game:GetService("Lighting")
+
+Lighting.FogEnd = math.huge
+Lighting.GlobalShadows = false
+
+for i,v in pairs(Lighting:GetChildren()) do
+		v:Destroy()
+end
+
+Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
+	if Lighting.FogEnd ~= math.huge then
+		Lighting.FogEnd = math.huge
+	end
+end)
+
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/GreenDeno/Venyx-UI-Library/main/source.lua"))()
+local venyx = library.new("Lore Game", 5430660086)
+
+local npc = {}
+npc.__index = npc
+local armorstands = {}
+local npctable = {}
+
+function npc.new(pos)
+    local mt = setmetatable({pos = pos}, npc)
+    return mt
+end
+function npc:MakeButton(section, bname)
+    section:addButton(bname, function()
+        game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = self.pos * CFrame.new(0,5,0)
+    end)
+end
+
+local page = venyx:addPage("[Teleport]\nNPCs")
+local page2 = venyx:addPage("[Teleport]\nArmor Stands")
+local section1 = page:addSection("Click button to teleport")
+local section2 = page2:addSection("Click button to teleport")
+
+for i,v in pairs(workspace.map.NPC:GetDescendants()) do
+    if v:IsA("Model") and v.Name ~= "Dummy" and v.Name ~= "Golem" and v.Name ~= "LongGolem" and v:FindFirstChild("HumanoidRootPart") and not string.match(v.Name:lower(), "armor") and not string.match(v.Name:lower(), "tunic") then
+        table.insert(npctable, #npctable + 1, v)
+    elseif v:IsA("Model") and v.Name ~= "Dummy" and v.Name ~= "Golem" and v.Name ~= "LongGolem" and v:FindFirstChild("HumanoidRootPart") and string.match(v.Name:lower(), "armor") or string.match(v.Name:lower(), "tunic") then
+        table.insert(armorstands, #armorstands + 1, v)
+    end
+end
+table.sort(npctable, function(a,b)
+    return tostring(a)<tostring(b)
+end)
+table.sort(armorstands, function(a,b)
+    return tostring(a)<tostring(b)
+end)
+for i,v in pairs(npctable) do
+    local NPC = npc.new(v.HumanoidRootPart.CFrame)
+    NPC:MakeButton(section1, v.Name)
+end
+for i,v in pairs(armorstands) do
+    local Armor = npc.new(v.HumanoidRootPart.CFrame)
+    Armor:MakeButton(section2, v.Name)
+end
+
+venyx:SelectPage(venyx.pages[1], true)
