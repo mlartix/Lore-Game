@@ -1,3 +1,24 @@
+
+local OldNameCall;
+--Bypasses antikick and anti map delete
+OldNameCall = hookmetamethod(game, "__namecall", function(...)
+    local Args = {...}
+    local Self = Args[1]
+    local NamecallMethod = getnamecallmethod()
+
+    if not checkcaller() and tostring(Self):lower() == "map" and NamecallMethod == "Destroy" then
+        print("map not deleted")
+        return 
+    elseif not checkcaller() and NamecallMethod == "Kick" then
+        print("anti kick bypassed")
+        return 
+    end
+
+    return OldNameCall(...)
+end)
+
+
+
 local Lighting = game:GetService("Lighting")
 
 Lighting.FogEnd = math.huge
